@@ -1,6 +1,7 @@
 package com.camerapoints;
 
 import com.camerapoints.utility.Direction;
+import com.camerapoints.utility.Helper;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -37,7 +38,6 @@ import java.util.List;
 public class CameraPointsPlugin extends Plugin implements KeyListener
 {
     private static final int TOPLEVEL_COMPASS_OP_SCRIPT_ID = 1050;
-    private static final String CONFIG_GROUP = "camerapoints";
     private static final String CONFIG_KEY = "points";
 
     @Inject
@@ -76,7 +76,7 @@ public class CameraPointsPlugin extends Plugin implements KeyListener
     @Override
     protected void startUp()
     {
-        loadConfig(configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY));
+        loadConfig(configManager.getConfiguration(Helper.CONFIG_GROUP, CONFIG_KEY));
 
         keyManager.registerKeyListener(this);
 
@@ -104,9 +104,9 @@ public class CameraPointsPlugin extends Plugin implements KeyListener
     @Subscribe
     public void onConfigChanged(ConfigChanged event)
     {
-        if (cameraPoints.isEmpty() && event.getGroup().equals(CONFIG_GROUP) && event.getKey().equals(CONFIG_KEY))
+        if (cameraPoints.isEmpty() && event.getGroup().equals(Helper.CONFIG_GROUP) && event.getKey().equals(CONFIG_KEY))
         {
-            loadConfig(configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY));
+            loadConfig(configManager.getConfiguration(Helper.CONFIG_GROUP, CONFIG_KEY));
         }
     }
 
@@ -143,11 +143,11 @@ public class CameraPointsPlugin extends Plugin implements KeyListener
     {
         if (cameraPoints.isEmpty())
         {
-            configManager.unsetConfiguration(CONFIG_GROUP, CONFIG_KEY);
+            configManager.unsetConfiguration(Helper.CONFIG_GROUP, CONFIG_KEY);
             return;
         }
 
-        configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY, gson.toJson(cameraPoints));
+        configManager.setConfiguration(Helper.CONFIG_GROUP, CONFIG_KEY, gson.toJson(cameraPoints));
     }
 
     private void loadConfig(String json)
