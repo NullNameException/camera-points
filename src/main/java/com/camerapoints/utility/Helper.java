@@ -1,11 +1,15 @@
 package com.camerapoints.utility;
 
+import net.runelite.client.ui.ColorScheme;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 
 public class Helper
 {
+    public static final Color BACKGROUND_COLOR = ColorScheme.DARK_GRAY_COLOR;
+
     public static boolean checkClick(MouseEvent event)
     {
         if (event.getButton() == MouseEvent.BUTTON1 && event.getSource() instanceof JComponent)

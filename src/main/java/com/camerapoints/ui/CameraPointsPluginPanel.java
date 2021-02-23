@@ -54,9 +54,9 @@ public class CameraPointsPluginPanel extends PluginPanel
         northPanel.add(addPoint, BorderLayout.EAST);
 
         JPanel centerPanel = new JPanel(new BorderLayout());
-        centerPanel.setBackground(ColorScheme.DARK_GRAY_COLOR);
+        centerPanel.setBackground(Helper.BACKGROUND_COLOR);
 
-        pointsView.setBackground(ColorScheme.DARK_GRAY_COLOR);
+        pointsView.setBackground(Helper.BACKGROUND_COLOR);
 
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.HORIZONTAL;

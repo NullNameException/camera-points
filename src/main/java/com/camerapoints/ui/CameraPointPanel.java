@@ -21,6 +21,13 @@ import java.awt.image.BufferedImage;
 
 class CameraPointPanel extends JPanel
 {
+    private static final int PITCH_LIMIT_MIN = 128;
+    private static final int PITCH_LIMIT_MAX = 512;
+    private static final int YAW_LIMIT_MIN = 0;
+    private static final int YAW_LIMIT_MAX = 2047;
+    private static final int ZOOM_LIMIT_MIN = -272;
+    private static final int ZOOM_LIMIT_MAX = 1004;
+
     private static final ImageIcon FROM_GAME_ICON;
     private static final ImageIcon FROM_GAME_HOVER_ICON;
     private static final ImageIcon FROM_GAME_PRESSED_ICON;
@@ -42,9 +49,9 @@ class CameraPointPanel extends JPanel
     private final JLabel cancelLabel = new JLabel("Cancel");
     private final JLabel renameLabel = new JLabel("Rename");
 
-    private final JSpinner pitchSpinner = new JSpinner(new SpinnerNumberModel(CameraPointsPlugin.PITCH_LIMIT_MIN, CameraPointsPlugin.PITCH_LIMIT_MIN, CameraPointsPlugin.PITCH_LIMIT_MAX, 1));
-    private final JSpinner yawSpinner = new JSpinner(new SpinnerNumberModel(CameraPointsPlugin.YAW_LIMIT_MIN, CameraPointsPlugin.YAW_LIMIT_MIN, CameraPointsPlugin.YAW_LIMIT_MAX, 1));
-    private final JSpinner zoomSpinner = new JSpinner(new SpinnerNumberModel(CameraPointsPlugin.ZOOM_LIMIT_MIN, CameraPointsPlugin.ZOOM_LIMIT_MIN, CameraPointsPlugin.ZOOM_LIMIT_MAX, 1));
+    private final JSpinner pitchSpinner = new JSpinner(new SpinnerNumberModel(PITCH_LIMIT_MIN, PITCH_LIMIT_MIN, PITCH_LIMIT_MAX, 1));
+    private final JSpinner yawSpinner = new JSpinner(new SpinnerNumberModel(YAW_LIMIT_MIN, YAW_LIMIT_MIN, YAW_LIMIT_MAX, 1));
+    private final JSpinner zoomSpinner = new JSpinner(new SpinnerNumberModel(ZOOM_LIMIT_MIN, ZOOM_LIMIT_MIN, ZOOM_LIMIT_MAX, 1));
 
     static
     {

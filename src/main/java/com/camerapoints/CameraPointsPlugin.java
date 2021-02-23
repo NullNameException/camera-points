@@ -34,19 +34,9 @@ import java.util.List;
         tags = { "save", "load", "position", "point", "angle", "pitch", "yaw", "zoom" } )
 public class CameraPointsPlugin extends Plugin implements KeyListener
 {
-    public static final int PITCH_LIMIT_MIN = 128;
-    public static final int PITCH_LIMIT_MAX = 512;
-    public static final int YAW_LIMIT_MIN = 0;
-    public static final int YAW_LIMIT_MAX = 2047;
-    public static final int ZOOM_LIMIT_MIN = -272;
-    public static final int ZOOM_LIMIT_MAX = 1004;
-
     private static final int CAM_FORCEANGLE_SCRIPT_ID = 143;
-    private static final String PLUGIN_NAME = "Camera Points";
     private static final String CONFIG_GROUP = "camerapoints";
     private static final String CONFIG_KEY = "points";
-    private static final String ICON_FILE = "panel_icon.png";
-    private static final String DEFAULT_POINT_NAME = "Camera Point ";
 
     @Inject
     private Gson gson;
@@ -82,8 +72,8 @@ public class CameraPointsPlugin extends Plugin implements KeyListener
         pluginPanel = new CameraPointsPluginPanel(this);
 
         navigationButton = NavigationButton.builder()
-                .tooltip(PLUGIN_NAME)
-                .icon(ImageUtil.loadImageResource(getClass(), ICON_FILE))
+                .tooltip("Camera Points")
+                .icon(ImageUtil.loadImageResource(getClass(), "panel_icon.png"))
                 .priority(5)
                 .panel(pluginPanel)
                 .build();
@@ -116,7 +106,7 @@ public class CameraPointsPlugin extends Plugin implements KeyListener
 
     public void addCameraPoint()
     {
-        cameraPoints.add(new CameraPoint(Instant.now().toEpochMilli(), DEFAULT_POINT_NAME + (cameraPoints.size() + 1), client.getCameraPitch(), client.getCameraYaw(), getZoom(), Keybind.NOT_SET));
+        cameraPoints.add(new CameraPoint(Instant.now().toEpochMilli(), "Camera Point " + (cameraPoints.size() + 1), client.getCameraPitch(), client.getCameraYaw(), getZoom(), Keybind.NOT_SET));
         updateConfig();
     }
 
