@@ -1,0 +1,190 @@
+package com.camerapoints;
+
+import com.google.common.base.Strings;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import lombok.Getter;
+import net.runelite.api.Client;
+import net.runelite.api.ScriptID;
+import net.runelite.api.VarClientInt;
+import net.runelite.client.callback.ClientThread;
+import net.runelite.client.config.ConfigManager;
+import net.runelite.client.config.Keybind;
+import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
+import net.runelite.client.input.KeyListener;
+import net.runelite.client.input.KeyManager;
+import net.runelite.client.plugins.Plugin;
+import net.runelite.client.plugins.PluginDescriptor;
+import com.camerapoints.ui.CameraPointsPluginPanel;
+import com.camerapoints.utility.CameraPoint;
+import net.runelite.client.ui.ClientToolbar;
+import net.runelite.client.ui.NavigationButton;
+import net.runelite.client.util.ImageUtil;
+
+import javax.inject.Inject;
+import java.awt.event.KeyEvent;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+
+@PluginDescriptor(
+        name = "Camera Points",
+        description = "Allows you to save and load camera positions, angles and zooms",
+        tags = { "save", "load", "position", "point", "angle", "pitch", "yaw", "zoom" } )
+public class CameraPointsPlugin extends Plugin implements KeyListener
+{
+    public static final int PITCH_LIMIT_MIN = 128;
+    public static final int PITCH_LIMIT_MAX = 512;
+    public static final int YAW_LIMIT_MIN = 0;
+    public static final int YAW_LIMIT_MAX = 2047;
+    public static final int ZOOM_LIMIT_MIN = -272;
+    public static final int ZOOM_LIMIT_MAX = 1004;
+
+    private static final int CAM_FORCEANGLE_SCRIPT_ID = 143;
+    private static final String PLUGIN_NAME = "Camera Points";
+    private static final String CONFIG_GROUP = "camerapoints";
+    private static final String CONFIG_KEY = "points";
+    private static final String ICON_FILE = "panel_icon.png";
+    private static final String DEFAULT_POINT_NAME = "Camera Point ";
+
+    @Inject
+    private Gson gson;
+
+    @Inject
+    private Client client;
+
+    @Inject
+    private ClientThread clientThread;
+
+    @Inject
+    private ClientToolbar clientToolbar;
+
+    @Inject
+    private KeyManager keyManager;
+
+    @Inject
+    private ConfigManager configManager;
+
+    private CameraPointsPluginPanel pluginPanel;
+    private NavigationButton navigationButton;
+
+    @Getter
+    private final List<CameraPoint> cameraPoints = new ArrayList<>();
+
+    @Override
+    protected void startUp()
+    {
+        loadConfig(configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY));
+
+        keyManager.registerKeyListener(this);
+
+        pluginPanel = new CameraPointsPluginPanel(this);
+
+        navigationButton = NavigationButton.builder()
+                .tooltip(PLUGIN_NAME)
+                .icon(ImageUtil.loadImageResource(getClass(), ICON_FILE))
+                .priority(5)
+                .panel(pluginPanel)
+                .build();
+
+        clientToolbar.addNavigation(navigationButton);
+    }
+
+    @Override
+    protected void shutDown()
+    {
+        keyManager.unregisterKeyListener(this);
+        cameraPoints.clear();
+        clientToolbar.removeNavigation(navigationButton);
+        pluginPanel = null;
+    }
+
+    @Subscribe
+    public void onConfigChanged(ConfigChanged event)
+    {
+        if (cameraPoints.isEmpty() && event.getGroup().equals(CONFIG_GROUP) && event.getKey().equals(CONFIG_KEY))
+        {
+            loadConfig(configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY));
+        }
+    }
+
+    public CameraPoint getCurrentPoint()
+    {
+        return new CameraPoint(-1, null, client.getCameraPitch(), client.getCameraYaw(), getZoom(), null);
+    }
+
+    public void addCameraPoint()
+    {
+        cameraPoints.add(new CameraPoint(Instant.now().toEpochMilli(), DEFAULT_POINT_NAME + (cameraPoints.size() + 1), client.getCameraPitch(), client.getCameraYaw(), getZoom(), Keybind.NOT_SET));
+        updateConfig();
+    }
+
+    private int getZoom()
+    {
+        return client.getVar(VarClientInt.CAMERA_ZOOM_FIXED_VIEWPORT);
+    }
+
+    public void removeCameraPoint(CameraPoint point)
+    {
+        cameraPoints.remove(point);
+        pluginPanel.rebuild();
+        updateConfig();
+    }
+
+    public void updateValues(CameraPoint point)
+    {
+        point.setPitch(client.getCameraPitch());
+        point.setYaw(client.getCameraYaw());
+        point.setZoom(getZoom());
+        updateConfig();
+    }
+
+    public void updateConfig()
+    {
+        if (cameraPoints.isEmpty())
+        {
+            configManager.unsetConfiguration(CONFIG_GROUP, CONFIG_KEY);
+            return;
+        }
+
+        configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY, gson.toJson(cameraPoints));
+    }
+
+    private void loadConfig(String json)
+    {
+        if (Strings.isNullOrEmpty(json))
+        {
+            return;
+        }
+
+        cameraPoints.addAll(gson.fromJson(json, new TypeToken<ArrayList<CameraPoint>>(){ }.getType()));
+    }
+
+    public void setCamera(CameraPoint point)
+    {
+        clientThread.invoke(() -> {
+            client.runScript(ScriptID.CAMERA_DO_ZOOM, point.getZoom(), point.getZoom());
+            client.runScript(CAM_FORCEANGLE_SCRIPT_ID, point.getPitch(), point.getYaw());
+        });
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) { }
+
+    @Override
+    public void keyPressed(KeyEvent e)
+    {
+        for (CameraPoint point : cameraPoints)
+        {
+            if (point.getKeybind().matches(e))
+            {
+                setCamera(point);
+                return;
+            }
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) { }
+}
