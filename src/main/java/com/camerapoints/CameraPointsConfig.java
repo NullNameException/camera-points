@@ -1,10 +1,11 @@
 package com.camerapoints;
 
+import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
 @ConfigGroup("camerapoints")
-public interface CameraPointsConfig
+public interface CameraPointsConfig extends Config
 {
     @ConfigItem(
             position = 0,

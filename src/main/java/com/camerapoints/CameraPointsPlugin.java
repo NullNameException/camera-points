@@ -3,6 +3,7 @@ package com.camerapoints;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.google.inject.Provides;
 import lombok.Getter;
 import net.runelite.api.Client;
 import net.runelite.api.ScriptID;
@@ -56,11 +57,20 @@ public class CameraPointsPlugin extends Plugin implements KeyListener
     @Inject
     private ConfigManager configManager;
 
+    @Inject
+    public CameraPointsConfig config;
+
     private CameraPointsPluginPanel pluginPanel;
     private NavigationButton navigationButton;
 
     @Getter
     private final List<CameraPoint> cameraPoints = new ArrayList<>();
+
+    @Provides
+    CameraPointsConfig getConfig(ConfigManager configManager)
+    {
+        return configManager.getConfig(CameraPointsConfig.class);
+    }
 
     @Override
     protected void startUp()

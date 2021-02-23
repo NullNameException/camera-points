@@ -77,16 +77,16 @@ class CameraPointPanel extends JPanel
         this.point = point;
 
         setLayout(new BorderLayout());
-        setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        setBackground(Helper.CONTENT_COLOR);
 
         JPanel nameWrapper = new JPanel(new BorderLayout());
-        nameWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        nameWrapper.setBorder(new CompoundBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, ColorScheme.DARK_GRAY_COLOR),
-                BorderFactory.createLineBorder(ColorScheme.DARKER_GRAY_COLOR)));
+        nameWrapper.setBackground(Helper.CONTENT_COLOR);
+        nameWrapper.setBorder(new CompoundBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Helper.BACKGROUND_COLOR),
+                BorderFactory.createLineBorder(Helper.CONTENT_COLOR)));
 
         JPanel nameActions = new JPanel(new BorderLayout(4, 0));
         nameActions.setBorder(new EmptyBorder(0, 4, 0, 8));
-        nameActions.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        nameActions.setBackground(Helper.CONTENT_COLOR);
 
         saveLabel.setVisible(false);
         saveLabel.setFont(FontManager.getRunescapeSmallFont());
@@ -218,7 +218,7 @@ class CameraPointPanel extends JPanel
         nameInput.setText(point.getName());
         nameInput.setBorder(null);
         nameInput.setEditable(false);
-        nameInput.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        nameInput.setBackground(Helper.CONTENT_COLOR);
         nameInput.setPreferredSize(new Dimension(0, 24));
         nameInput.getTextField().setForeground(Color.WHITE);
         nameInput.getTextField().setBorder(new EmptyBorder(0, 8, 0, 0));
@@ -260,7 +260,7 @@ class CameraPointPanel extends JPanel
             @Override
             public void mouseEntered(MouseEvent mouseEvent)
             {
-                if (!renameLabel.isVisible())
+                if (!renameLabel.isVisible() || !plugin.config.showPreview())
                 {
                     return;
                 }
@@ -287,14 +287,14 @@ class CameraPointPanel extends JPanel
 
         JPanel bottomContainer = new JPanel(new BorderLayout());
         bottomContainer.setBorder(new EmptyBorder(8, 8, 8, 8));
-        bottomContainer.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        bottomContainer.setBackground(Helper.CONTENT_COLOR);
 
         JPanel spinnerPanel = new JPanel(new BorderLayout(8, 0));
         spinnerPanel.setBorder(new EmptyBorder(0, 0, 8, 0));
-        spinnerPanel.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        spinnerPanel.setBackground(Helper.CONTENT_COLOR);
 
         JPanel innerSpinnerPanel = new JPanel(new GridLayout(1, 2, 8, 0));
-        innerSpinnerPanel.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        innerSpinnerPanel.setBackground(Helper.CONTENT_COLOR);
 
         pitchSpinner.setToolTipText("Pitch value");
         pitchSpinner.setValue(point.getPitch());
@@ -330,11 +330,11 @@ class CameraPointPanel extends JPanel
         spinnerPanel.add(innerSpinnerPanel, BorderLayout.CENTER);
 
         JPanel centerPanel = new JPanel(new BorderLayout(4, 0));
-        centerPanel.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        centerPanel.setBackground(Helper.CONTENT_COLOR);
         centerPanel.setPreferredSize(new Dimension(0, 20));
 
         JPanel actionPanel = new JPanel(new BorderLayout(4, 0));
-        actionPanel.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        actionPanel.setBackground(Helper.CONTENT_COLOR);
 
         JButton hotkeyButton = new JButton();
         //hotkeyButton.setPreferredSize(new Dimension(0, 20));
