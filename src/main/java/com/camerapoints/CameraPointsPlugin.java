@@ -193,9 +193,9 @@ public class CameraPointsPlugin extends Plugin implements KeyListener
     {
         // Most chat dialogs with numerical input are added without the chatbox or its key listener being removed,
         // so chatboxFocused() is true. The chatbox onkey script uses the following logic to ignore key presses,
-        // so we will use it too to not remap F-keys.
+        // so we will use it too to not set the camera.
         return isHidden(WidgetInfo.CHATBOX_MESSAGES) || isHidden(WidgetInfo.CHATBOX_TRANSPARENT_LINES)
-                // We want to block F-key remapping in the bank pin interface too, so it does not interfere with the
+                // We want to block camera setting in the bank pin interface too, so it does not interfere with the
                 // Keyboard Bankpin feature of the Bank plugin
                 || !isHidden(WidgetInfo.BANK_PIN_CONTAINER);
     }
@@ -244,8 +244,6 @@ public class CameraPointsPlugin extends Plugin implements KeyListener
             switch (e.getKeyCode()) {
                 case KeyEvent.VK_ESCAPE:
                 case KeyEvent.VK_ENTER:
-                    // When exiting typing mode, block the escape key
-                    // so that it doesn't trigger the in-game hotkeys
                     setTyping(false);
                     break;
                 case KeyEvent.VK_BACK_SPACE:
@@ -257,6 +255,7 @@ public class CameraPointsPlugin extends Plugin implements KeyListener
             }
         }
     }
+
     @Override
     public void keyReleased(KeyEvent e) { }
 }
