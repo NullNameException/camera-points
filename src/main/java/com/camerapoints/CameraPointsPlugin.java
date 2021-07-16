@@ -4,10 +4,15 @@ import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Provides;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 import net.runelite.api.Client;
 import net.runelite.api.ScriptID;
+import net.runelite.api.VarClientStr;
 import net.runelite.api.VarClientInt;
+import net.runelite.api.widgets.Widget;
+import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.config.Keybind;
@@ -22,7 +27,6 @@ import com.camerapoints.utility.CameraPoint;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.util.ImageUtil;
-
 import javax.inject.Inject;
 import java.awt.event.KeyEvent;
 import java.time.Instant;
@@ -75,6 +79,7 @@ public class CameraPointsPlugin extends Plugin implements KeyListener
     @Override
     protected void startUp()
     {
+        typing = false;
         loadConfig(configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY));
 
         keyManager.registerKeyListener(this);
@@ -169,22 +174,87 @@ public class CameraPointsPlugin extends Plugin implements KeyListener
         });
     }
 
+    boolean chatboxFocused()
+    {
+        Widget chatboxParent = client.getWidget(WidgetInfo.CHATBOX_PARENT);
+        if (chatboxParent == null || chatboxParent.getOnKeyListener() == null)
+        {
+            return false;
+        }
+
+        // the search box on the world map can be focused, and chat input goes there, even
+        // though the chatbox still has its key listener.
+        Widget worldMapSearch = client.getWidget(WidgetInfo.WORLD_MAP_SEARCH);
+        return worldMapSearch == null || client.getVar(VarClientInt.WORLD_MAP_SEARCH_FOCUSED) != 1;
+    }
+
+    boolean isDialogOpen()
+    {
+        // Most chat dialogs with numerical input are added without the chatbox or its key listener being removed,
+        // so chatboxFocused() is true. The chatbox onkey script uses the following logic to ignore key presses,
+        // so we will use it too to not remap F-keys.
+        return isHidden(WidgetInfo.CHATBOX_MESSAGES) || isHidden(WidgetInfo.CHATBOX_TRANSPARENT_LINES)
+                // We want to block F-key remapping in the bank pin interface too, so it does not interfere with the
+                // Keyboard Bankpin feature of the Bank plugin
+                || !isHidden(WidgetInfo.BANK_PIN_CONTAINER);
+    }
+
+    private boolean isHidden(WidgetInfo widgetInfo)
+    {
+        Widget w = client.getWidget(widgetInfo);
+        return w == null || w.isSelfHidden();
+    }
+
+    @Getter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
+    private boolean typing;
+
     @Override
     public void keyTyped(KeyEvent e) { }
 
     @Override
-    public void keyPressed(KeyEvent e)
-    {
-        for (CameraPoint point : cameraPoints)
-        {
-            if (point.getKeybind().matches(e))
-            {
-                setCamera(point);
-                return;
+    public void keyPressed(KeyEvent e) {
+        if (!chatboxFocused()) {
+            return;
+        }
+        if (!isTyping()) {
+            if (!isDialogOpen()) {
+                {
+                    for (CameraPoint point : cameraPoints) {
+                        if (point.getKeybind().matches(e)) {
+                            setCamera(point);
+                            return;
+                        }
+                    }
+                }
+                switch (e.getKeyCode()) {
+                    case KeyEvent.VK_ENTER:
+                    case KeyEvent.VK_SLASH:
+                    case KeyEvent.VK_COLON:
+                        if (config.keyRemap()) {
+                            setTyping(true);
+                            break;
+                        }
+                }
+            }
+        }
+        else {
+            switch (e.getKeyCode()) {
+                case KeyEvent.VK_ESCAPE:
+                case KeyEvent.VK_ENTER:
+                    // When exiting typing mode, block the escape key
+                    // so that it doesn't trigger the in-game hotkeys
+                    setTyping(false);
+                    break;
+                case KeyEvent.VK_BACK_SPACE:
+                    // If typed text is empty, backspace closes input mode
+                    if (Strings.isNullOrEmpty(client.getVar(VarClientStr.CHATBOX_TYPED_TEXT))) {
+                        setTyping(false);
+                    }
+                    break;
             }
         }
     }
-
     @Override
     public void keyReleased(KeyEvent e) { }
 }
