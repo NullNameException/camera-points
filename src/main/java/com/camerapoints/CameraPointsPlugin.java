@@ -27,6 +27,7 @@ import com.camerapoints.utility.CameraPoint;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.util.ImageUtil;
+
 import javax.inject.Inject;
 import java.awt.event.KeyEvent;
 import java.time.Instant;
@@ -213,7 +214,8 @@ public class CameraPointsPlugin extends Plugin implements KeyListener
     public void keyTyped(KeyEvent e) { }
 
     @Override
-    public void keyPressed(KeyEvent e) {
+    public void keyPressed(KeyEvent e)
+    {
         if (!chatboxFocused()) {
             return;
         }
