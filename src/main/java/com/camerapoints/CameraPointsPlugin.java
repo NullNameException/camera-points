@@ -1,5 +1,7 @@
 package com.camerapoints;
 
+import com.camerapoints.utility.Direction;
+import com.camerapoints.utility.Helper;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -9,8 +11,8 @@ import lombok.Getter;
 import lombok.Setter;
 import net.runelite.api.Client;
 import net.runelite.api.ScriptID;
-import net.runelite.api.VarClientStr;
 import net.runelite.api.VarClientInt;
+import net.runelite.api.VarClientStr;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.callback.ClientThread;
@@ -37,11 +39,10 @@ import java.util.List;
 @PluginDescriptor(
         name = "Camera Points",
         description = "Allows you to save and load camera positions, angles and zooms",
-        tags = { "save", "load", "position", "point", "angle", "pitch", "yaw", "zoom" } )
+        tags = { "save", "load", "direction", "zoom" } )
 public class CameraPointsPlugin extends Plugin implements KeyListener
 {
-    private static final int CAM_FORCEANGLE_SCRIPT_ID = 143;
-    private static final String CONFIG_GROUP = "camerapoints";
+    private static final int TOPLEVEL_COMPASS_OP_SCRIPT_ID = 1050;
     private static final String CONFIG_KEY = "points";
 
     @Inject
@@ -80,8 +81,8 @@ public class CameraPointsPlugin extends Plugin implements KeyListener
     @Override
     protected void startUp()
     {
-        typing = false;
-        loadConfig(configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY));
+        setTyping(false);
+        loadConfig(configManager.getConfiguration(Helper.CONFIG_GROUP, CONFIG_KEY));
 
         keyManager.registerKeyListener(this);
 
@@ -109,20 +110,20 @@ public class CameraPointsPlugin extends Plugin implements KeyListener
     @Subscribe
     public void onConfigChanged(ConfigChanged event)
     {
-        if (cameraPoints.isEmpty() && event.getGroup().equals(CONFIG_GROUP) && event.getKey().equals(CONFIG_KEY))
+        if (cameraPoints.isEmpty() && event.getGroup().equals(Helper.CONFIG_GROUP) && event.getKey().equals(CONFIG_KEY))
         {
-            loadConfig(configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY));
+            loadConfig(configManager.getConfiguration(Helper.CONFIG_GROUP, CONFIG_KEY));
         }
     }
 
     public CameraPoint getCurrentPoint()
     {
-        return new CameraPoint(-1, null, client.getCameraPitch(), client.getCameraYaw(), getZoom(), null);
+        return new CameraPoint(-1, null, Direction.NONE, getZoom(), null);
     }
 
     public void addCameraPoint()
     {
-        cameraPoints.add(new CameraPoint(Instant.now().toEpochMilli(), "Camera Point " + (cameraPoints.size() + 1), client.getCameraPitch(), client.getCameraYaw(), getZoom(), Keybind.NOT_SET));
+        cameraPoints.add(new CameraPoint(Instant.now().toEpochMilli(), "Camera Point " + (cameraPoints.size() + 1), Direction.NONE, getZoom(), Keybind.NOT_SET));
         updateConfig();
     }
 
@@ -140,8 +141,6 @@ public class CameraPointsPlugin extends Plugin implements KeyListener
 
     public void updateValues(CameraPoint point)
     {
-        point.setPitch(client.getCameraPitch());
-        point.setYaw(client.getCameraYaw());
         point.setZoom(getZoom());
         updateConfig();
     }
@@ -150,11 +149,11 @@ public class CameraPointsPlugin extends Plugin implements KeyListener
     {
         if (cameraPoints.isEmpty())
         {
-            configManager.unsetConfiguration(CONFIG_GROUP, CONFIG_KEY);
+            configManager.unsetConfiguration(Helper.CONFIG_GROUP, CONFIG_KEY);
             return;
         }
 
-        configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY, gson.toJson(cameraPoints));
+        configManager.setConfiguration(Helper.CONFIG_GROUP, CONFIG_KEY, gson.toJson(cameraPoints));
     }
 
     private void loadConfig(String json)
@@ -171,7 +170,10 @@ public class CameraPointsPlugin extends Plugin implements KeyListener
     {
         clientThread.invoke(() -> {
             client.runScript(ScriptID.CAMERA_DO_ZOOM, point.getZoom(), point.getZoom());
-            client.runScript(CAM_FORCEANGLE_SCRIPT_ID, point.getPitch(), point.getYaw());
+            if (point.getDirection() != Direction.NONE)
+            {
+                client.runScript(TOPLEVEL_COMPASS_OP_SCRIPT_ID, point.getDirection().getValue());
+            }
         });
     }
 

@@ -10,8 +10,7 @@ public class CameraPoint
 {
     private long id;
     private String name;
-    private int pitch;
-    private int yaw;
+    private Direction direction;
     private int zoom;
     private Keybind keybind;
 }

@@ -1,10 +1,11 @@
 package com.camerapoints;
 
+import com.camerapoints.utility.Helper;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
-@ConfigGroup("camerapoints")
+@ConfigGroup(Helper.CONFIG_GROUP)
 public interface CameraPointsConfig extends Config
 {
     @ConfigItem(
@@ -25,6 +26,6 @@ public interface CameraPointsConfig extends Config
             description = "When enabled, will not change camera while typing."
     )
     default boolean keyRemap() {
-        return false;
+        return true;
     }
 }

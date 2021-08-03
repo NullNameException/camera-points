@@ -3,7 +3,6 @@ package com.camerapoints.ui;
 import com.camerapoints.utility.CameraPoint;
 import com.camerapoints.CameraPointsPlugin;
 import com.camerapoints.utility.Helper;
-import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.ui.components.PluginErrorPanel;
 import net.runelite.client.util.ImageUtil;
@@ -58,11 +57,6 @@ public class CameraPointsPluginPanel extends PluginPanel
 
         pointsView.setBackground(Helper.BACKGROUND_COLOR);
 
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.fill = GridBagConstraints.HORIZONTAL;
-        constraints.gridx = constraints.gridy = 0;
-        constraints.weightx = 1;
-
         noPointsPanel.setContent("Camera Points", "Save and load camera points.");
 
         addPoint.setToolTipText("Add new camera point");
@@ -116,8 +110,8 @@ public class CameraPointsPluginPanel extends PluginPanel
     {
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.HORIZONTAL;
-        constraints.gridx = constraints.gridy = 0;
         constraints.weightx = 1;
+        constraints.gridy = 0;
 
         pointsView.removeAll();
 

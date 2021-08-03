@@ -1,5 +1,6 @@
 package com.camerapoints.ui;
 
+import com.camerapoints.utility.Direction;
 import net.runelite.client.config.Keybind;
 import com.camerapoints.utility.CameraPoint;
 import com.camerapoints.CameraPointsPlugin;
@@ -21,10 +22,6 @@ import java.awt.image.BufferedImage;
 
 class CameraPointPanel extends JPanel
 {
-    private static final int PITCH_LIMIT_MIN = 128;
-    private static final int PITCH_LIMIT_MAX = 512;
-    private static final int YAW_LIMIT_MIN = 0;
-    private static final int YAW_LIMIT_MAX = 2047;
     private static final int ZOOM_LIMIT_MIN = -272;
     private static final int ZOOM_LIMIT_MAX = 1004;
 
@@ -49,8 +46,7 @@ class CameraPointPanel extends JPanel
     private final JLabel cancelLabel = new JLabel("Cancel");
     private final JLabel renameLabel = new JLabel("Rename");
 
-    private final JSpinner pitchSpinner = new JSpinner(new SpinnerNumberModel(PITCH_LIMIT_MIN, PITCH_LIMIT_MIN, PITCH_LIMIT_MAX, 1));
-    private final JSpinner yawSpinner = new JSpinner(new SpinnerNumberModel(YAW_LIMIT_MIN, YAW_LIMIT_MIN, YAW_LIMIT_MAX, 1));
+    private final JComboBox<Direction> directionBox = new JComboBox<>(Direction.values());
     private final JSpinner zoomSpinner = new JSpinner(new SpinnerNumberModel(ZOOM_LIMIT_MIN, ZOOM_LIMIT_MIN, ZOOM_LIMIT_MAX, 1));
 
     static
@@ -289,30 +285,25 @@ class CameraPointPanel extends JPanel
         bottomContainer.setBorder(new EmptyBorder(8, 8, 8, 8));
         bottomContainer.setBackground(Helper.CONTENT_COLOR);
 
-        JPanel spinnerPanel = new JPanel(new BorderLayout(8, 0));
-        spinnerPanel.setBorder(new EmptyBorder(0, 0, 8, 0));
-        spinnerPanel.setBackground(Helper.CONTENT_COLOR);
+        JPanel controlPanel = new JPanel(new GridBagLayout());
+        controlPanel.setBorder(new EmptyBorder(0, 0, 8, 0));
+        controlPanel.setBackground(Helper.CONTENT_COLOR);
 
-        JPanel innerSpinnerPanel = new JPanel(new GridLayout(1, 2, 8, 0));
-        innerSpinnerPanel.setBackground(Helper.CONTENT_COLOR);
+        GridBagConstraints directionConstraints = new GridBagConstraints();
+        directionConstraints.fill = GridBagConstraints.HORIZONTAL;
+        directionConstraints.weightx = 0.65;
 
-        pitchSpinner.setToolTipText("Pitch value");
-        pitchSpinner.setValue(point.getPitch());
-        pitchSpinner.addChangeListener(e ->
+        GridBagConstraints zoomConstraints = new GridBagConstraints();
+        zoomConstraints.fill = GridBagConstraints.HORIZONTAL;
+        zoomConstraints.weightx = 0.35;
+
+        directionBox.setToolTipText("Direction");
+        directionBox.setPreferredSize(new Dimension(0, 20));
+        directionBox.addActionListener(e ->
         {
-            point.setPitch((int)pitchSpinner.getValue());
+            point.setDirection((Direction)directionBox.getSelectedItem());
             plugin.updateConfig();
         });
-        pitchSpinner.setPreferredSize(new Dimension(55, 20));
-
-        yawSpinner.setToolTipText("Yaw value");
-        yawSpinner.setValue(point.getYaw());
-        yawSpinner.addChangeListener(e ->
-        {
-            point.setYaw((int)yawSpinner.getValue());
-            plugin.updateConfig();
-        });
-        yawSpinner.setPreferredSize(new Dimension(0, 20));
 
         zoomSpinner.setToolTipText("Zoom value");
         zoomSpinner.setValue(point.getZoom());
@@ -323,11 +314,9 @@ class CameraPointPanel extends JPanel
         });
         zoomSpinner.setPreferredSize(new Dimension(0, 20));
 
-        innerSpinnerPanel.add(yawSpinner);
-        innerSpinnerPanel.add(zoomSpinner);
-
-        spinnerPanel.add(pitchSpinner, BorderLayout.WEST);
-        spinnerPanel.add(innerSpinnerPanel, BorderLayout.CENTER);
+        controlPanel.add(directionBox, directionConstraints);
+        controlPanel.add(Box.createRigidArea(new Dimension(8, 0)));
+        controlPanel.add(zoomSpinner, zoomConstraints);
 
         JPanel centerPanel = new JPanel(new BorderLayout(4, 0));
         centerPanel.setBackground(Helper.CONTENT_COLOR);
@@ -433,8 +422,6 @@ class CameraPointPanel extends JPanel
                 if (result == 0)
                 {
                     plugin.updateValues(point);
-                    pitchSpinner.setValue(point.getPitch());
-                    yawSpinner.setValue(point.getYaw());
                     zoomSpinner.setValue(point.getZoom());
                 }
 
@@ -510,7 +497,7 @@ class CameraPointPanel extends JPanel
         centerPanel.add(hotkeyButton, BorderLayout.CENTER);
         centerPanel.add(actionPanel, BorderLayout.EAST);
 
-        bottomContainer.add(spinnerPanel, BorderLayout.NORTH);
+        bottomContainer.add(controlPanel, BorderLayout.NORTH);
         bottomContainer.add(centerPanel, BorderLayout.CENTER);
 
         add(nameWrapper, BorderLayout.NORTH);
