@@ -22,8 +22,8 @@ public interface CameraPointsConfig extends Config
     @ConfigItem(
             position = 1,
             keyName = "keyRemap",
-            name = "Key remapping plugin enabled",
-            description = "When enabled, will not change camera while typing."
+            name = "Disable hotkeys while typing",
+            description = "When enabled, will not change load any camera points while typing."
     )
     default boolean keyRemap() {
         return true;

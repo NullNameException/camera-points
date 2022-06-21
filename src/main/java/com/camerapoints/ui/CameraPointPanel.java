@@ -262,7 +262,9 @@ class CameraPointPanel extends JPanel
                 }
 
                 previous = plugin.getCurrentPoint();
-                plugin.setCamera(point);
+                CameraPoint toSet = point;
+                toSet.setDirection(Direction.NONE);
+                plugin.setCamera(toSet);
             }
 
             @Override
