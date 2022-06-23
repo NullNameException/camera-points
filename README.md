@@ -9,7 +9,8 @@ Sadly it is not allowed to load the camera yaw/pitch so only changing the zoom v
 Preview on hover allows you to see what the camera zoom would look like after loading it. However this does not apply the compass direction (since there would be no way to get your previous pitch/yaw angle back).<br>
 The other option allows you to disable your hotkeys while typing in a chatbox.
 
-## Camera Points list
+## Camera Points settings
+You can find all your saved camera points in the sidepanel<br>
 ![.](https://i.imgur.com/FXo1Grz.png) <br>
 The compass direction is outlined in brown.<br>
 The zoom value is outlined in yellow.<br>

@@ -91,6 +91,7 @@ public class CameraPointsPlugin extends Plugin implements KeyListener
         navigationButton = NavigationButton.builder()
                 .tooltip("Camera Points")
                 .icon(ImageUtil.loadImageResource(getClass(), "panel_icon.png"))
+                .priority(4)
                 .panel(pluginPanel)
                 .build();
 

@@ -23,7 +23,7 @@ public interface CameraPointsConfig extends Config
             position = 1,
             keyName = "keyRemap",
             name = "Disable hotkeys while typing",
-            description = "When enabled, will not change load any camera points while typing."
+            description = "When enabled, will not load any camera points while typing."
     )
     default boolean keyRemap() {
         return true;
