@@ -250,7 +250,7 @@ public class CameraPointsPlugin extends Plugin implements KeyListener
                     break;
                 case KeyEvent.VK_BACK_SPACE:
                     // If typed text is empty, backspace closes input mode
-                    if (Strings.isNullOrEmpty(client.getVar(VarClientStr.CHATBOX_TYPED_TEXT))) {
+                    if (Strings.isNullOrEmpty(client.getVarcStrValue(VarClientStr.CHATBOX_TYPED_TEXT))) {
                         setTyping(false);
                     }
                     break;
