@@ -193,7 +193,7 @@ public class CameraPointsPlugin extends Plugin implements KeyListener
         // the search box on the world map can be focused, and chat input goes there, even
         // though the chatbox still has its key listener.
         Widget worldMapSearch = client.getWidget(WidgetInfo.WORLD_MAP_SEARCH);
-        return worldMapSearch == null || client.getVarbitValue(VarClientInt.WORLD_MAP_SEARCH_FOCUSED) != 1;
+        return worldMapSearch == null || client.getVarcIntValue(VarClientInt.WORLD_MAP_SEARCH_FOCUSED) != 1;
     }
 
     boolean isDialogOpen()
