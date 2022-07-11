@@ -10,20 +10,20 @@ repositories {
 	mavenCentral()
 }
 
-def runeLiteVersion = '1.8.24.2'
+def runeLiteVersion = '1.8.26'
 
 dependencies {
 	compileOnly group: 'net.runelite', name:'client', version: runeLiteVersion
 
-	compileOnly 'org.projectlombok:lombok:1.18.4'
-	annotationProcessor 'org.projectlombok:lombok:1.18.4'
+	compileOnly 'org.projectlombok:lombok:1.18.24'
+	annotationProcessor 'org.projectlombok:lombok:1.18.24'
 
-	testImplementation 'junit:junit:4.12'
+	testImplementation 'junit:junit:4.13.2'
 	testImplementation group: 'net.runelite', name:'client', version: runeLiteVersion
 }
 
 group = 'com.camerapoints'
-version = '2.2.1'
+version = '2.2.2'
 sourceCompatibility = '1.8'
 
 tasks.withType(JavaCompile) {

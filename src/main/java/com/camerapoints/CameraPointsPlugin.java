@@ -29,12 +29,17 @@ import com.camerapoints.utility.CameraPoint;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.util.ImageUtil;
+import okio.Timeout;
 
 import javax.inject.Inject;
 import java.awt.event.KeyEvent;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @PluginDescriptor(
         name = "Camera Points",
@@ -129,7 +134,7 @@ public class CameraPointsPlugin extends Plugin implements KeyListener
 
     private int getZoom()
     {
-        return client.getVar(VarClientInt.CAMERA_ZOOM_FIXED_VIEWPORT);
+        return client.getVarcIntValue(VarClientInt.CAMERA_ZOOM_FIXED_VIEWPORT);
     }
 
     public void removeCameraPoint(CameraPoint point)
@@ -188,7 +193,7 @@ public class CameraPointsPlugin extends Plugin implements KeyListener
         // the search box on the world map can be focused, and chat input goes there, even
         // though the chatbox still has its key listener.
         Widget worldMapSearch = client.getWidget(WidgetInfo.WORLD_MAP_SEARCH);
-        return worldMapSearch == null || client.getVar(VarClientInt.WORLD_MAP_SEARCH_FOCUSED) != 1;
+        return worldMapSearch == null || client.getVarbitValue(VarClientInt.WORLD_MAP_SEARCH_FOCUSED) != 1;
     }
 
     boolean isDialogOpen()
@@ -250,7 +255,7 @@ public class CameraPointsPlugin extends Plugin implements KeyListener
                     break;
                 case KeyEvent.VK_BACK_SPACE:
                     // If typed text is empty, backspace closes input mode
-                    if (Strings.isNullOrEmpty(client.getVar(VarClientStr.CHATBOX_TYPED_TEXT))) {
+                    if (Strings.isNullOrEmpty(client.getVarcStrValue(VarClientStr.CHATBOX_TYPED_TEXT))) {
                         setTyping(false);
                     }
                     break;

@@ -23,7 +23,7 @@ import java.awt.image.BufferedImage;
 class CameraPointPanel extends JPanel
 {
     private static final int ZOOM_LIMIT_MIN = -272;
-    private static final int ZOOM_LIMIT_MAX = 1004;
+    private static final int ZOOM_LIMIT_MAX = 1400;
 
     private static final ImageIcon FROM_GAME_ICON;
     private static final ImageIcon FROM_GAME_HOVER_ICON;
