@@ -1,5 +1,8 @@
 package com.camerapoints.utility;
 
+import net.runelite.api.VarClientInt;
+import net.runelite.api.widgets.Widget;
+import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.ui.ColorScheme;
 
 import javax.swing.*;

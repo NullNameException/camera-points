@@ -119,7 +119,6 @@ public class CameraPointsPluginPanel extends PluginPanel
         {
             title.setVisible(false);
             pointsView.add(noPointsPanel, constraints);
-            constraints.gridy++;
         }
         else
         {
@@ -138,7 +137,7 @@ public class CameraPointsPluginPanel extends PluginPanel
         revalidate();
     }
 
-    public void create()
+    private void create()
     {
         plugin.addCameraPoint();
         rebuild();

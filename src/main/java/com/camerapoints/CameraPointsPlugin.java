@@ -43,8 +43,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @PluginDescriptor(
         name = "Camera Points",
-        description = "Allows you to save and load camera positions, angles and zooms",
-        tags = { "save", "load", "direction", "zoom" } )
+        description = "Allows you to save and load your camera zoom and a compass direction",
+        tags = { "save", "load", "camera", "zoom", "compass", "direction", "hotkey" } )
 public class CameraPointsPlugin extends Plugin implements KeyListener
 {
     private static final int TOPLEVEL_COMPASS_OP_SCRIPT_ID = 1050;
@@ -121,14 +121,9 @@ public class CameraPointsPlugin extends Plugin implements KeyListener
         }
     }
 
-    public CameraPoint getCurrentPoint()
-    {
-        return new CameraPoint(-1, null, Direction.NONE, getZoom(), null);
-    }
-
     public void addCameraPoint()
     {
-        cameraPoints.add(new CameraPoint(Instant.now().toEpochMilli(), "Camera Point " + (cameraPoints.size() + 1), Direction.NONE, getZoom(), Keybind.NOT_SET));
+        cameraPoints.add(new CameraPoint(Instant.now().toEpochMilli(), "Camera Point " + (cameraPoints.size() + 1), Direction.NONE, true, getZoom(), Keybind.NOT_SET));
         updateConfig();
     }
 
@@ -174,7 +169,10 @@ public class CameraPointsPlugin extends Plugin implements KeyListener
     public void setCamera(CameraPoint point)
     {
         clientThread.invoke(() -> {
-            client.runScript(ScriptID.CAMERA_DO_ZOOM, point.getZoom(), point.getZoom());
+            if (point.isApplyZoom())
+            {
+                client.runScript(ScriptID.CAMERA_DO_ZOOM, point.getZoom(), point.getZoom());
+            }
             if (point.getDirection() != Direction.NONE)
             {
                 client.runScript(TOPLEVEL_COMPASS_OP_SCRIPT_ID, point.getDirection().getValue());
@@ -182,7 +180,7 @@ public class CameraPointsPlugin extends Plugin implements KeyListener
         });
     }
 
-    boolean chatboxFocused()
+    private boolean chatboxFocused()
     {
         Widget chatboxParent = client.getWidget(WidgetInfo.CHATBOX_PARENT);
         if (chatboxParent == null || chatboxParent.getOnKeyListener() == null)
@@ -190,21 +188,13 @@ public class CameraPointsPlugin extends Plugin implements KeyListener
             return false;
         }
 
-        // the search box on the world map can be focused, and chat input goes there, even
-        // though the chatbox still has its key listener.
         Widget worldMapSearch = client.getWidget(WidgetInfo.WORLD_MAP_SEARCH);
         return worldMapSearch == null || client.getVarcIntValue(VarClientInt.WORLD_MAP_SEARCH_FOCUSED) != 1;
     }
 
-    boolean isDialogOpen()
+    private boolean isDialogOpen()
     {
-        // Most chat dialogs with numerical input are added without the chatbox or its key listener being removed,
-        // so chatboxFocused() is true. The chatbox onkey script uses the following logic to ignore key presses,
-        // so we will use it too to not set the camera.
-        return isHidden(WidgetInfo.CHATBOX_MESSAGES) || isHidden(WidgetInfo.CHATBOX_TRANSPARENT_LINES)
-                // We want to block camera setting in the bank pin interface too, so it does not interfere with the
-                // Keyboard Bankpin feature of the Bank plugin
-                || !isHidden(WidgetInfo.BANK_PIN_CONTAINER);
+        return isHidden(WidgetInfo.CHATBOX_MESSAGES) || isHidden(WidgetInfo.CHATBOX_TRANSPARENT_LINES) || !isHidden(WidgetInfo.BANK_PIN_CONTAINER);
     }
 
     private boolean isHidden(WidgetInfo widgetInfo)
@@ -223,41 +213,45 @@ public class CameraPointsPlugin extends Plugin implements KeyListener
     @Override
     public void keyPressed(KeyEvent e)
     {
-        if (!chatboxFocused()) {
-            return;
-        }
-        if (!isTyping()) {
-            if (!isDialogOpen()) {
-                {
-                    for (CameraPoint point : cameraPoints) {
-                        if (point.getKeybind().matches(e)) {
-                            setCamera(point);
-                            return;
-                        }
-                    }
-                }
-                switch (e.getKeyCode()) {
-                    case KeyEvent.VK_ENTER:
-                    case KeyEvent.VK_SLASH:
-                    case KeyEvent.VK_COLON:
-                        if (config.keyRemap()) {
-                            setTyping(true);
-                            break;
-                        }
+        if ((!isTyping() && !isDialogOpen()) || !config.disableWhileTyping())
+        {
+            for (CameraPoint point : cameraPoints) {
+                if (point.getKeybind().matches(e)) {
+                    setCamera(point);
+                    return;
                 }
             }
         }
-        else {
-            switch (e.getKeyCode()) {
+
+        if (!chatboxFocused())
+        {
+            return;
+        }
+
+        if (isTyping())
+        {
+            switch (e.getKeyCode())
+            {
                 case KeyEvent.VK_ESCAPE:
                 case KeyEvent.VK_ENTER:
                     setTyping(false);
                     break;
                 case KeyEvent.VK_BACK_SPACE:
-                    // If typed text is empty, backspace closes input mode
-                    if (Strings.isNullOrEmpty(client.getVarcStrValue(VarClientStr.CHATBOX_TYPED_TEXT))) {
+                    if (Strings.isNullOrEmpty(client.getVarcStrValue(VarClientStr.CHATBOX_TYPED_TEXT)))
+                    {
                         setTyping(false);
                     }
+                    break;
+            }
+        }
+        else
+        {
+            switch (e.getKeyCode())
+            {
+                case KeyEvent.VK_ENTER:
+                case KeyEvent.VK_SLASH:
+                case KeyEvent.VK_COLON:
+                    setTyping(true);
                     break;
             }
         }

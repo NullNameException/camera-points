@@ -40,15 +40,11 @@ class CameraPointPanel extends JPanel
 
     private final CameraPointsPlugin plugin;
     private final CameraPoint point;
-    private CameraPoint previous;
 
     private final FlatTextField nameInput = new FlatTextField();
     private final JLabel saveLabel = new JLabel("Save");
     private final JLabel cancelLabel = new JLabel("Cancel");
     private final JLabel renameLabel = new JLabel("Rename");
-
-    private final JComboBox<Direction> directionBox = new JComboBox<>(Direction.values());
-    private final JSpinner zoomSpinner = new JSpinner(new SpinnerNumberModel(ZOOM_LIMIT_MIN, ZOOM_LIMIT_MIN, ZOOM_LIMIT_MAX, 1));
 
     static
     {
@@ -78,8 +74,7 @@ class CameraPointPanel extends JPanel
 
         JPanel nameWrapper = new JPanel(new BorderLayout());
         nameWrapper.setBackground(Helper.CONTENT_COLOR);
-        nameWrapper.setBorder(new CompoundBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Helper.BACKGROUND_COLOR),
-                BorderFactory.createLineBorder(Helper.CONTENT_COLOR)));
+        nameWrapper.setBorder(new CompoundBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Helper.BACKGROUND_COLOR), BorderFactory.createLineBorder(Helper.CONTENT_COLOR)));
 
         JPanel nameActions = new JPanel(new BorderLayout(4, 0));
         nameActions.setBorder(new EmptyBorder(0, 4, 0, 8));
@@ -244,40 +239,8 @@ class CameraPointPanel extends JPanel
                     return;
                 }
 
-                if (previous != null)
-                {
-                    plugin.setCamera(previous);
-                    previous = null;
-                }
-
                 nameInput.setEditable(true);
                 updateNameActions(true);
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent mouseEvent)
-            {
-                if (!renameLabel.isVisible() || !plugin.config.showPreview())
-                {
-                    return;
-                }
-
-                previous = plugin.getCurrentPoint();
-                CameraPoint toSet = point;
-                toSet.setDirection(Direction.NONE);
-                plugin.setCamera(toSet);
-            }
-
-            @Override
-            public void mouseExited(MouseEvent mouseEvent)
-            {
-                if (previous == null)
-                {
-                    return;
-                }
-
-                plugin.setCamera(previous);
-                previous = null;
             }
         });
 
@@ -294,13 +257,15 @@ class CameraPointPanel extends JPanel
 
         GridBagConstraints directionConstraints = new GridBagConstraints();
         directionConstraints.fill = GridBagConstraints.HORIZONTAL;
-        directionConstraints.weightx = 0.65;
+        directionConstraints.weightx = 0.6;
 
         GridBagConstraints zoomConstraints = new GridBagConstraints();
         zoomConstraints.fill = GridBagConstraints.HORIZONTAL;
-        zoomConstraints.weightx = 0.35;
+        zoomConstraints.weightx = 0.4;
 
-        directionBox.setToolTipText("Direction");
+        JComboBox<Direction> directionBox = new JComboBox<>(Direction.values());
+        directionBox.setToolTipText("Compass direction");
+        directionBox.setSelectedIndex(point.getDirection().getValue());
         directionBox.setPreferredSize(new Dimension(0, 20));
         directionBox.addActionListener(e ->
         {
@@ -308,8 +273,10 @@ class CameraPointPanel extends JPanel
             plugin.updateConfig();
         });
 
+        JSpinner zoomSpinner = new JSpinner(new SpinnerNumberModel(ZOOM_LIMIT_MIN, ZOOM_LIMIT_MIN, ZOOM_LIMIT_MAX, 1));
         zoomSpinner.setToolTipText("Zoom value");
         zoomSpinner.setValue(point.getZoom());
+        zoomSpinner.setEnabled(point.isApplyZoom());
         zoomSpinner.addChangeListener(e ->
         {
             point.setZoom((int)zoomSpinner.getValue());
@@ -325,11 +292,26 @@ class CameraPointPanel extends JPanel
         centerPanel.setBackground(Helper.CONTENT_COLOR);
         centerPanel.setPreferredSize(new Dimension(0, 20));
 
-        JPanel actionPanel = new JPanel(new BorderLayout(4, 0));
+        JPanel actionPanel = new JPanel(new GridBagLayout());
         actionPanel.setBackground(Helper.CONTENT_COLOR);
 
+        GridBagConstraints applyZoomConstraints = new GridBagConstraints();
+        applyZoomConstraints.fill = GridBagConstraints.HORIZONTAL;
+        applyZoomConstraints.weightx = 0.25;
+
+        GridBagConstraints loadConstraints = new GridBagConstraints();
+        loadConstraints.fill = GridBagConstraints.HORIZONTAL;
+        loadConstraints.weightx = 0.25;
+
+        GridBagConstraints saveConstraints = new GridBagConstraints();
+        saveConstraints.fill = GridBagConstraints.HORIZONTAL;
+        saveConstraints.weightx = 0.25;
+
+        GridBagConstraints deleteConstraints = new GridBagConstraints();
+        deleteConstraints.fill = GridBagConstraints.HORIZONTAL;
+        deleteConstraints.weightx = 0.25;
+
         JButton hotkeyButton = new JButton();
-        //hotkeyButton.setPreferredSize(new Dimension(0, 20));
         hotkeyButton.setToolTipText("Load point hotkey");
         hotkeyButton.setText(point.getKeybind().toString());
         hotkeyButton.setFont(FontManager.getDefaultFont().deriveFont(12.f));
@@ -339,7 +321,8 @@ class CameraPointPanel extends JPanel
             public void mouseReleased(MouseEvent e)
             {
                 hotkeyButton.setText(Keybind.NOT_SET.toString());
-                updateHotkey(Keybind.NOT_SET);
+                point.setKeybind(Keybind.NOT_SET);
+                plugin.updateConfig();
             }
         });
         hotkeyButton.addKeyListener(new KeyAdapter()
@@ -349,8 +332,18 @@ class CameraPointPanel extends JPanel
             {
                 Keybind hotkey = new Keybind(e);
                 hotkeyButton.setText(hotkey.toString());
-                updateHotkey(hotkey);
+                point.setKeybind(hotkey);
+                plugin.updateConfig();
             }
+        });
+
+        JCheckBox applyZoomCheck = new JCheckBox("", true);
+        applyZoomCheck.setToolTipText("Apply zoom when loading");
+        applyZoomCheck.setSelected(point.isApplyZoom());
+        applyZoomCheck.addChangeListener(e -> {
+            zoomSpinner.setEnabled(applyZoomCheck.isSelected());
+            point.setApplyZoom(applyZoomCheck.isSelected());
+            plugin.updateConfig();
         });
 
         JLabel loadLabel = new JLabel();
@@ -396,7 +389,7 @@ class CameraPointPanel extends JPanel
 
         JLabel fromGameLabel = new JLabel();
         fromGameLabel.setIcon(FROM_GAME_ICON);
-        fromGameLabel.setToolTipText("Get current point from game");
+        fromGameLabel.setToolTipText("Get current zoom value from game");
         fromGameLabel.addMouseListener(new MouseAdapter()
         {
             @Override
@@ -419,8 +412,8 @@ class CameraPointPanel extends JPanel
                 }
 
                 int result = JOptionPane.showConfirmDialog(CameraPointPanel.this,
-                        "Are you sure you want override this camera point?",
-                        " Get current point from game", JOptionPane.OK_CANCEL_OPTION);
+                        "Are you sure you want override the current zoom value?",
+                        " Get current zoom value from game", JOptionPane.OK_CANCEL_OPTION);
 
                 if (result == 0)
                 {
@@ -493,9 +486,10 @@ class CameraPointPanel extends JPanel
             }
         });
 
-        actionPanel.add(loadLabel, BorderLayout.WEST);
-        actionPanel.add(fromGameLabel, BorderLayout.CENTER);
-        actionPanel.add(deleteLabel, BorderLayout.EAST);
+        actionPanel.add(applyZoomCheck, applyZoomConstraints);
+        actionPanel.add(loadLabel, loadConstraints);
+        actionPanel.add(fromGameLabel, saveConstraints);
+        actionPanel.add(deleteLabel, deleteConstraints);
 
         centerPanel.add(hotkeyButton, BorderLayout.CENTER);
         centerPanel.add(actionPanel, BorderLayout.EAST);
@@ -505,13 +499,6 @@ class CameraPointPanel extends JPanel
 
         add(nameWrapper, BorderLayout.NORTH);
         add(bottomContainer, BorderLayout.CENTER);
-
-        /*if (nameInput.getFontMetrics(nameInput.getFont()).stringWidth(nameInput.getText()) > nameInput.getWidth())
-        {
-            System.out.println(nameInput.getFontMetrics(nameInput.getFont()).stringWidth(nameInput.getText()));
-            System.out.println(nameInput.getWidth());
-            nameInput.setToolTipText(point.getName());
-        }*/
     }
 
     private void save()
@@ -542,11 +529,5 @@ class CameraPointPanel extends JPanel
             nameInput.getTextField().requestFocusInWindow();
             nameInput.getTextField().selectAll();
         }
-    }
-
-    private void updateHotkey(Keybind hotkey)
-    {
-        point.setKeybind(hotkey);
-        plugin.updateConfig();
     }
 }

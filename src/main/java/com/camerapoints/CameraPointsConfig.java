@@ -10,22 +10,11 @@ public interface CameraPointsConfig extends Config
 {
     @ConfigItem(
             position = 0,
-            keyName = "preview",
-            name = "Preview on hover",
-            description = "Enables/Disables the camera preview on hovering the name of the Camera Point"
-    )
-    default boolean showPreview()
-    {
-        return true;
-    }
-
-    @ConfigItem(
-            position = 1,
-            keyName = "keyRemap",
+            keyName = "disableWhileTyping",
             name = "Disable hotkeys while typing",
-            description = "When enabled, will not load any camera points while typing."
+            description = "When enabled, will not load any camera points while typing in a chatbox."
     )
-    default boolean keyRemap() {
+    default boolean disableWhileTyping() {
         return true;
     }
 }
