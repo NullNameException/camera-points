@@ -3,7 +3,6 @@ package com.camerapoints.ui;
 import com.camerapoints.utility.CameraPoint;
 import com.camerapoints.CameraPointsPlugin;
 import com.camerapoints.utility.Helper;
-import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.ui.components.PluginErrorPanel;
 import net.runelite.client.util.ImageUtil;

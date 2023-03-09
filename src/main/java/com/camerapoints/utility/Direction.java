@@ -4,8 +4,8 @@ public enum Direction
 {
     NONE(0, "Unchanged"),
     NORTH(1, "North"),
-    EAST(3, "East"),
-    SOUTH(2, "South"),
+    EAST(2, "East"),
+    SOUTH(3, "South"),
     WEST(4, "West");
 
     private final int value;

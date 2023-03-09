@@ -8,7 +8,7 @@ import java.awt.event.MouseEvent;
 
 public class Helper
 {
-    public static final String CONFIG_GROUP = "camerapoints2";
+    public static final String CONFIG_GROUP = "camerapoints";
 
     public static final Color BACKGROUND_COLOR = ColorScheme.DARK_GRAY_COLOR;
     public static final Color CONTENT_COLOR = ColorScheme.DARKER_GRAY_COLOR;
