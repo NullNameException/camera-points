@@ -2,7 +2,7 @@
 
 This plugin allows you to save and load your camera zoom and/or a compass direction.<br>
 Since it is not allowed to have presets for camera yaw/pitch/position, only these two features are supported by this plugin.<br>
-However, this plugin does work with the "expand inner/outer zoom limit" as well as "Preserve pitch on compass look" settings from the default "Camera" plugin.
+However, this plugin does work with the "expand inner/outer zoom limit" and "Preserve pitch on compass look" settings from the default "Camera" plugin.
 
 ## Settings
 When "Disable hotkeys while typing" is enabled, camera points will not be loaded while you are typing in a chatbox.
